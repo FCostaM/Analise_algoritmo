@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void multiplicaMatrizes(int n, int m1[][n],int m2[][n])
+int multiplicaMatrizes(int n, int m1[][n],int m2[][n], int z[][n])
 {
-    int z[n][n];
+    //int z[n][n];
 
     for(int i = 0; i < n; i++)
     {
@@ -17,7 +17,7 @@ void multiplicaMatrizes(int n, int m1[][n],int m2[][n])
         }
     }
 
-    mostraMatriz(n, z);
+    //mostraMatriz(n, z);
 }
 
 void mostraMatriz(int n, int matriz[][n])
@@ -68,7 +68,13 @@ int main(void)
 
     printf("\nResultado Normal:\n");
 
-    multiplicaMatrizes(n, matriz1, matriz2);
+    int z[n][n];
+
+    //inicia caculo de tempo
+    multiplicaMatrizes(n, matriz1, matriz2, z);
+    //termina calculo de tempo
+
+    mostraMatriz(n, z);
 
     printf("\nAlgoritmo 2:\n");
 
