@@ -35,41 +35,40 @@ void mostraMatriz(int n, int matriz[][n])
 
 int main(void)
 {
-    /*
-    int matriz[2][2] = {{1,1},{1,1}};    
-    mostraMatriz(2, matriz);
-    multiplicaMatrizes(2, matriz, matriz);
-    */
+    srand(time(NULL));
 
-    int n;
-    FILE *arq;
+    int n = 4;
 
-    arq = fopen("matriz.txt", "r");
-    if(arq == NULL)
-    {
-        printf("Arquivo inexistente");
-        return 0;
-    }
+    printf("numero n: %d\n", n);
 
-    fscanf(arq, "%d", &n);
-
-    int matriz[n][n];
+    int matriz1[n][n];
+    int matriz2[n][n];
 
     for(int i = 0; i < n; i++)
     {
-        for(int j; j < n; j++)
+        for(int j = 0; j < n; j++)
         {
-            fscanf(arq, "%d", &matriz[i][j]);
+            matriz1[i][j] = rand()%10;
         }
     }
 
-    mostraMatriz(n, matriz);
+    for(int i = 0; i < n; i++)
+    {
+        for(int j = 0; j < n; j++)
+        {
+            matriz2[i][j] = rand()%10;
+        }
+    }
 
-    printf("%d", n);
+    printf("\nMatriz 1:\n");
+    mostraMatriz(n, matriz1);
 
-    fclose(arq);
-    
+    printf("\nMatriz 2:\n");
+    mostraMatriz(n, matriz2);
+
+    printf("\nResultado:\n");
+
+    multiplicaMatrizes(n, matriz1, matriz2);
+
     return 0;
 }
-
-
