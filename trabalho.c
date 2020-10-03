@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define N 1024
+#define N 4
+#define number 10
 
 int *criaMatriz(int *mat)
 {
@@ -16,7 +17,7 @@ void iniciaMatriz(int *mat)
     {
         for (int j = 0; j < N; j++)
         {
-            mat[(i * N) + j] = rand()%10;
+            mat[(i * N) + j] = rand()%number;
         }
     }
 }
@@ -44,7 +45,7 @@ void mostraMatriz(int *matriz)
     }
 }
 
-/*int multiplicaMatrizes(int *m1, int *m2)
+int multiplicaMatrizes(int *m1, int *m2)
 {
     int *z = criaMatriz(z);
     
@@ -52,16 +53,17 @@ void mostraMatriz(int *matriz)
     {
         for(int j = 0; j < N; j++)
         {
-            z[i][j] = 0;
+            z[(i * N) + j] = 0;
             for(int k = 0; k < N; k++)
             {
-                z[i][j] = z[i][j] + m1[i][k] * m2[k][j];
+                //z[i][j] = z[i][j] + m1[i][k] * m2[k][j];
+                z[(i * N) + j] = z[(i * N) + j] + m1[(i * N) + k] * m2[(k * N) + j];
             }
         }
     }
 
     return z;
-}*/
+}
 
 int strassen(int *A, int *B, int *C, int m, int n)
 {
@@ -102,25 +104,31 @@ int main()
     
     int *mat1 = criaMatriz(mat1);
     iniciaMatriz(mat1);
-    //mostraMatriz(mat1);
+    mostraMatriz(mat1);
 
     printf("\nMatriz 2\n");
 
     int *mat2 = criaMatriz(mat2);
     iniciaMatriz(mat2);
-    //mostraMatriz(mat2);
+    mostraMatriz(mat2);
+
+    printf("\nAlgoritmo 1\n");
+
+    int *z = multiplicaMatrizes(mat1, mat2);
+    mostraMatriz(z);
 
     int *result = criaMatriz(result);
     iniciaMatrizZero(result);
 
     printf("\nStrassen\n");
     strassen(mat1, mat2, result, N, N);
-    //mostraMatriz(result);
+    mostraMatriz(result);
 
-    printf("deu bom");
+    printf("\ndeu bom\n");
 
     free(mat1);
     free(mat2);
+    free(z);
     free(result);
 
     return 0; 
