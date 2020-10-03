@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
-#define N 4
+#define N 1024
 #define number 10
 
 int *criaMatriz(int *mat)
@@ -48,7 +49,7 @@ void mostraMatriz(int *matriz)
 int multiplicaMatrizes(int *m1, int *m2)
 {
     int *z = criaMatriz(z);
-    
+
     for(int i = 0; i < N; i++)
     {
         for(int j = 0; j < N; j++)
@@ -96,33 +97,48 @@ int strassen(int *A, int *B, int *C, int m, int n)
     }
 }
 
-int main() 
-{ 
+int main()
+{
     srand(time(NULL));
 
     printf("\nMatriz 1\n");
-    
+
     int *mat1 = criaMatriz(mat1);
     iniciaMatriz(mat1);
-    mostraMatriz(mat1);
+    //mostraMatriz(mat1);
 
     printf("\nMatriz 2\n");
 
     int *mat2 = criaMatriz(mat2);
     iniciaMatriz(mat2);
-    mostraMatriz(mat2);
+    //mostraMatriz(mat2);
 
     printf("\nAlgoritmo 1\n");
 
+    clock_t comecoNormal = clock();
     int *z = multiplicaMatrizes(mat1, mat2);
-    mostraMatriz(z);
+    clock_t finalNormal = clock();
+
+    double tempoGastoNormal = (double)(finalNormal - comecoNormal) / CLOCKS_PER_SEC;
+
+    //mostraMatriz(z);
+
+    printf("\n\n\nTempo gasto normal: %f\n\n", tempoGastoNormal);
 
     int *result = criaMatriz(result);
     iniciaMatrizZero(result);
 
     printf("\nStrassen\n");
+
+    clock_t comecoStrassen = clock();
     strassen(mat1, mat2, result, N, N);
-    mostraMatriz(result);
+    clock_t finalStrassen = clock();
+
+    double tempoGastoStrassen = (double)(finalStrassen - comecoStrassen) / CLOCKS_PER_SEC;
+
+    //mostraMatriz(result);
+
+    printf("\n\n\nTempo gasto strassen: %f\n\n", tempoGastoStrassen);
 
     printf("\ndeu bom\n");
 
@@ -131,5 +147,5 @@ int main()
     free(z);
     free(result);
 
-    return 0; 
+    return 0;
 }
