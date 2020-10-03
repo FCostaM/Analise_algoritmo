@@ -2,156 +2,172 @@
 #include <stdlib.h>
 #include <time.h>
 
-int multiplicaMatrizes(int n, long int **m1,long int **m2, long int **z)
+#define N 128     //Tamanho da matriz
+#define T 10        
+
+//Aloca a memória da matriz
+int *criaMatriz(int *mat)
 {
-    //int z[n][n];
+    mat = malloc (N * N * sizeof (int*)) ;
 
-    clock_t begin = clock();
-    for(int i = 0; i < n; i++)
-    {
-        for(int j = 0; j < n; j++)
-        {
-            z[i][j] = 0;
-            for(int k = 0; k < n; k++)
-            {
-                z[i][j] = z[i][j] + m1[i][k] * m2[k][j];
-            }
-        }
-    }
-
-    clock_t end = clock();
-    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-    printf("\n\n\nTempo gasto normal: %f\n\n", time_spent);
-    //mostraMatriz(n, z);
+    return mat;
 }
 
-void mostraMatriz(int n, long int matriz[][n])
+//Inicializa a matriz com valores aleatórios
+void iniciaMatriz(int *mat)
 {
-    for(int i = 0; i < n; i++)
+    for (int i = 0; i < N; i++)
     {
-        for(int j = 0; j < n; j++)
+        for (int j = 0; j < N; j++)
         {
-            printf("%d ", matriz[i][j]);
+            mat[(i * N) + j] = rand()%T;
+        }
+    }
+}
+
+//Inicializa a matriz com valor zero
+void iniciaMatrizZero(int *mat)
+{
+    for (int i = 0; i < N; i++)
+    {
+        for (int j = 0; j < N; j++)
+        {
+            mat[(i * N) + j] = 0;
+        }
+    }
+}
+
+//Imprime na tela a matriz
+void mostraMatriz(int *matriz)
+{
+    for(int i = 0; i < N; i++)
+    {
+        for(int j = 0; j < N; j++)
+        {
+            printf("%d ", *((matriz + i * N) + j));
         }
         printf("\n");
     }
 }
 
-long int alocaMatriz(int n, long int **matriz) {
-    matriz = (int **)malloc(n*sizeof(int*));
+//Multiplicação básica de matrizes
+//Algoritmo restirado do roteiro do projeto
+int multiplicaMatrizes(int *m1, int *m2)
+{
+    int *z = criaMatriz(z);
 
-    int j;
-
-    for(j=0;j<n;j++) {
-        matriz[j]=(int*)malloc(n*sizeof(int));
+    for(int i = 0; i < N; i++)
+    {
+        for(int j = 0; j < N; j++)
+        {
+            z[(i * N) + j] = 0;
+            for(int k = 0; k < N; k++)
+            {
+                z[(i * N) + j] = z[(i * N) + j] + m1[(i * N) + k] * m2[(k * N) + j];
+            }
+        }
     }
 
-    return matriz;
+    return z;
 }
 
+//Multiplicação de matrizes usando o algoritmo de Strassen
+int MultiplicaStrassen(int *A, int *B, int *C, int m, int n)
+{
+    if(m == 2)
+    {
+        //p1 = (A[0][0] + A[1][1]) * (B[0][0] + B[1][1])
+        int p1 = (*A + *(A + n + 1)) * (*B + *(B + n + 1));
 
-int main(void)
+        //p2 = (A[1][0]+A[1][1])*B[0][0]
+        int p2 = (*(A + n) + *(A + n + 1)) * (*B);
+
+        //p3 = A[0][0] * (B[0][1] - B[1][1])
+        int p3 = (*A) * (*(B + 1) - *(B + n + 1));  
+
+        //p4 = A[1][1] * (B[1][0] - B[0][0])
+        int p4 = (*(A + n + 1)) * (*(B + n) - *B);
+
+        //p5 = (A[0][0] + A[0][1]) * B[1][1]
+        int p5 = (*A + *(A + 1)) * (*(B + n + 1));
+
+        //p6 = (A[1][0] - A[0][0]) * (B[0][0] + B[0][1])
+        int p6 = (*(A + n) - *A) * (*B + *(B + 1));
+        
+        //p7 = (A[0][1] - A[1][1]) * (B[1][0] + B[1][1]);
+        int p7 = (*(A + 1)-*(A + n + 1)) * (*(B + n) + *(B + n + 1));  
+
+        *C       = *C + p1 + p4 - p5 + p7;              //C[0][0]
+        *(C+1)   = *(C + 1) + p3 + p5;                  //C[0][1]
+        *(C+n)   = *(C + n) + p2 + p4;                  //C[1][0]
+        *(C+n+1) = *(C + n + 1) + p1 + p3 - p2 + p6;    //C[1][1]
+    }
+    else
+    {
+        m = m/2;
+        MultiplicaStrassen(A          ,B          ,C          ,m,n);
+        MultiplicaStrassen(A          ,B+m        ,C+m        ,m,n);
+        MultiplicaStrassen(A+m        ,B+m*n      ,C          ,m,n);
+        MultiplicaStrassen(A+m        ,B+m*(n+1)  ,C+m        ,m,n);
+        MultiplicaStrassen(A+m*n      ,B          ,C+m*n      ,m,n);
+        MultiplicaStrassen(A+m*n      ,B+m        ,C+m*(n+1)  ,m,n);
+        MultiplicaStrassen(A+m*(n+1)  ,B+m*n      ,C+m*n      ,m,n);
+        MultiplicaStrassen(A+m*(n+1)  ,B+m*(n+1)  ,C+m*(n+1)  ,m,n);
+    }
+}
+
+int main()
 {
     srand(time(NULL));
 
-    int n = 512;
+    printf("\n\nMatriz 1\n\n");
 
-    printf("numero n: %d\n", n);
+    //Cria e inicializa a matriz A
+    int *mat1 = criaMatriz(mat1);
+    iniciaMatriz(mat1);
+    mostraMatriz(mat1);
 
-    long int **matriz1;
-    long int **matriz2;
+    printf("\n\nMatriz 2\n\n");
 
-    matriz1 = alocaMatriz(n, matriz1);
+    //Cria e inicializa a matriz A
+    int *mat2 = criaMatriz(mat2);
+    iniciaMatriz(mat2);
+    mostraMatriz(mat2);
 
-    matriz2 = alocaMatriz(n, matriz2);
+    printf("\n\nAlgoritmo 1\n\n");
 
-    for(int i = 0; i < n; i++)
-    {
-        for(int j = 0; j < n; j++)
-        {
-            matriz1[i][j] = rand()%10;
-        }
-    }
+    //Medição de tempo do algoritmo 1
+    clock_t comecoNormal = clock();
+    int *result_normal = multiplicaMatrizes(mat1, mat2);
+    clock_t finalNormal = clock();
 
-    for(int i = 0; i < n; i++)
-    {
-        for(int j = 0; j < n; j++)
-        {
-            matriz2[i][j] = rand()%10;
-        }
-    }
+    mostraMatriz(result_normal);
 
-    printf("\nMatriz 1:\n");
-    //mostraMatriz(n, matriz1);
+    //Tempo gasto para execução do algoritmo 1
+    double tempoGastoNormal = (double)(finalNormal - comecoNormal) / CLOCKS_PER_SEC;
+    printf("\nTempo gasto Algoritmo 1: %f segundos\n\n", tempoGastoNormal);
 
-    printf("\nMatriz 2:\n");
-    //mostraMatriz(n, matriz2);
+    int *result_strassen = criaMatriz(result_strassen);
+    iniciaMatrizZero(result_strassen);
 
-    printf("\nResultado Normal:\n");
+    printf("\nAlgoritmo Strassen\n\n");
 
-    long int **z;
+    //Medição de tempo do algoritmo de Strassen
+    clock_t comecoStrassen = clock();
+    MultiplicaStrassen(mat1, mat2, result_strassen, N, N);
+    clock_t finalStrassen = clock();
 
-    z = alocaMatriz(n, z);
+    mostraMatriz(result_strassen);
 
-    //inicia caculo de tempo
-    multiplicaMatrizes(n, matriz1, matriz2, z);
-    //termina calculo de tempo
+    //Tempo gasto para execução do algoritmo de Strassen
+    double tempoGastoStrassen = (double)(finalStrassen - comecoStrassen) / CLOCKS_PER_SEC;
+    printf("\nTempo gasto Algoritmo Strassen: %f segundos\n\n", tempoGastoStrassen);
 
-    //mostraMatriz(n, z);
-
-    printf("\nAlgoritmo 2:\n");
-
-    long int **matrizResultante;
-
-    matrizResultante = alocaMatriz(n, matrizResultante);
-
-    for(int i = 0; i<n; i++) {
-        for(int j=0; j<n; j++) {
-            matrizResultante[i][j] = 0;
-        }
-    }
-
-    printf("\n\nResultado Strassen\n\n");
-
-    clock_t begin = clock();
-
-    strassen(*matriz1, *matriz2, *matrizResultante, n, n);
-
-    clock_t end = clock();
-    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-    printf("\n\n\nTempo gasto strassen: %f\n\n", time_spent);
-
-    //mostraMatriz(n, matrizResultante);
+    //Libera a memória das matrizes
+    free(mat1);
+    free(mat2);
+    free(result_normal);
+    free(result_strassen);
 
     return 0;
-}
-
-
-int strassen(long int *A, long int *B, long int *C, int m, int n){
-    printf("\nMatriz 1:\n");
-    if(m==2){
-        int P=(*A+*(A+n+1))*(*B+*(B+n+1));  //P=(A[0][0]+A[1][1])*(B[0][0]+B[1][1])
-        int Q=(*(A+n)+*(A+n+1))*(*B);   //Q=(A[1][0]+A[1][1])*B[0][0]
-        int R=(*A)*(*(B+1)-*(B+n+1));   //R=A[0][0]*(B[0][1]-B[1][1])
-        int S=(*(A+n+1))*(*(B+n)-*B);   //S=A[1][1]*(B[1][0]-B[0][0])
-        int T=(*A+*(A+1))*(*(B+n+1));   //T=(A[0][0]+A[0][1])*B[1][1]
-        int U=(*(A+n)-*A)*(*B+*(B+1));  //U=(A[1][0]-A[0][0])*(B[0][0]+B[0][1])
-        int V=(*(A+1)-*(A+n+1))*(*(B+n)+*(B+n+1));  //V=(A[0][1]-A[1][1])*(B[1][0]+B[1][1]);
-
-        *C=*C+P+S-T+V;  //C[0][0]=P+S-T+V
-        *(C+1)=*(C+1)+R+T;  //C[0][1]=R+T
-        *(C+n)=*(C+n)+Q+S;  //C[1][0]=Q+S
-        *(C+n+1)=*(C+n+1)+P+R-Q+U;  //C[1][1]=P+R-Q+U
-    }
-    else{
-        m=m/2;
-        strassen(A,B,C,m,n);
-        strassen(A,B+m,C+m,m,n);
-        strassen(A+m,B+m*n,C,m,n);
-        strassen(A+m,B+m*(n+1),C+m,m,n);
-        strassen(A+m*n,B,C+m*n,m,n);
-        strassen(A+m*n,B+m,C+m*(n+1),m,n);
-        strassen(A+m*(n+1),B+m*n,C+m*n,m,n);
-        strassen(A+m*(n+1),B+m*(n+1),C+m*(n+1),m,n);
-    }
 }
