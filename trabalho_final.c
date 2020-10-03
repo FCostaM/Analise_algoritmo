@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
-int multiplicaMatrizes(int n, int m1[][n],int m2[][n], int z[][n])
+int multiplicaMatrizes(int n, long int **m1,long int **m2, long int **z)
 {
     //int z[n][n];
 
+    clock_t begin = clock();
     for(int i = 0; i < n; i++)
     {
         for(int j = 0; j < n; j++)
@@ -17,10 +19,13 @@ int multiplicaMatrizes(int n, int m1[][n],int m2[][n], int z[][n])
         }
     }
 
+    clock_t end = clock();
+    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+    printf("\n\n\nTempo gasto normal: %f\n\n", time_spent);
     //mostraMatriz(n, z);
 }
 
-void mostraMatriz(int n, int matriz[][n])
+void mostraMatriz(int n, long int matriz[][n])
 {
     for(int i = 0; i < n; i++)
     {
@@ -32,17 +37,33 @@ void mostraMatriz(int n, int matriz[][n])
     }
 }
 
+long int alocaMatriz(int n, long int **matriz) {
+    matriz = (int **)malloc(n*sizeof(int*));
+
+    int j;
+
+    for(j=0;j<n;j++) {
+        matriz[j]=(int*)malloc(n*sizeof(int));
+    }
+
+    return matriz;
+}
+
 
 int main(void)
 {
     srand(time(NULL));
 
-    int n = 8;
+    int n = 512;
 
     printf("numero n: %d\n", n);
 
-    int matriz1[n][n];
-    int matriz2[n][n];
+    long int **matriz1;
+    long int **matriz2;
+
+    matriz1 = alocaMatriz(n, matriz1);
+
+    matriz2 = alocaMatriz(n, matriz2);
 
     for(int i = 0; i < n; i++)
     {
@@ -61,24 +82,28 @@ int main(void)
     }
 
     printf("\nMatriz 1:\n");
-    mostraMatriz(n, matriz1);
+    //mostraMatriz(n, matriz1);
 
     printf("\nMatriz 2:\n");
-    mostraMatriz(n, matriz2);
+    //mostraMatriz(n, matriz2);
 
     printf("\nResultado Normal:\n");
 
-    int z[n][n];
+    long int **z;
+
+    z = alocaMatriz(n, z);
 
     //inicia caculo de tempo
     multiplicaMatrizes(n, matriz1, matriz2, z);
     //termina calculo de tempo
 
-    mostraMatriz(n, z);
+    //mostraMatriz(n, z);
 
     printf("\nAlgoritmo 2:\n");
 
-    int matrizResultante[n][n];
+    long int **matrizResultante;
+
+    matrizResultante = alocaMatriz(n, matrizResultante);
 
     for(int i = 0; i<n; i++) {
         for(int j=0; j<n; j++) {
@@ -87,15 +112,23 @@ int main(void)
     }
 
     printf("\n\nResultado Strassen\n\n");
-    strassen(matriz1, matriz2, matrizResultante, n, n);
 
-    mostraMatriz(n, matrizResultante);
+    clock_t begin = clock();
+
+    strassen(*matriz1, *matriz2, *matrizResultante, n, n);
+
+    clock_t end = clock();
+    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+    printf("\n\n\nTempo gasto strassen: %f\n\n", time_spent);
+
+    //mostraMatriz(n, matrizResultante);
 
     return 0;
 }
 
 
-int strassen(int *A, int *B, int *C, int m, int n){
+int strassen(long int *A, long int *B, long int *C, int m, int n){
+    printf("\nMatriz 1:\n");
     if(m==2){
         int P=(*A+*(A+n+1))*(*B+*(B+n+1));  //P=(A[0][0]+A[1][1])*(B[0][0]+B[1][1])
         int Q=(*(A+n)+*(A+n+1))*(*B);   //Q=(A[1][0]+A[1][1])*B[0][0]
